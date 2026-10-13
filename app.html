@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tent math - calculators</title>
+<style>
+  :root { --accent: #3a7a8a; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: Georgia, 'Times New Roman', serif; background: #f4f7f8; color: #242a2c; line-height: 1.55; }
+  main { max-width: 1100px; margin: 0 auto; padding: 40px 20px 64px; }
+  h1 { font-size: 2rem; margin: 0 0 8px; color: var(--accent); }
+  .lede { margin: 0 0 14px; max-width: 640px; }
+  .note { background: #fff; border: 1px solid #d6dfe2; border-left: 4px solid var(--accent); border-radius: 6px; padding: 12px 16px; font-size: 0.9rem; margin: 0 0 28px; max-width: 720px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 18px; }
+  section { background: #fff; border: 1px solid #d6dfe2; border-radius: 8px; padding: 20px 22px; }
+  h2 { font-size: 1.15rem; margin: 0 0 6px; }
+  .hint { font-size: 0.9rem; color: #6f7d82; margin: 0 0 14px; }
+  label { display: block; font-size: 0.9rem; margin: 10px 0 3px; }
+  input { width: 100%; padding: 8px 10px; font-size: 1rem; border: 1px solid #b2bfc4; border-radius: 5px; font-family: inherit; }
+  button { margin-top: 16px; width: 100%; padding: 11px; background: var(--accent); color: #fff; border: 0; border-radius: 6px; font-size: 1rem; cursor: pointer; font-family: inherit; }
+  button:hover { filter: brightness(1.08); }
+  .out { margin-top: 14px; font-size: 1rem; min-height: 1.4em; }
+  .out.err { color: #a32222; }
+  footer { max-width: 1100px; margin: 0 auto; padding: 0 20px 40px; font-size: 0.85rem; color: #99a5a9; }
+  a { color: var(--accent); }
+</style>
+</head>
+<body>
+<main>
+  <h1>Tent math</h1>
+  <p class="lede">The floor names the honest capacity, the margin names the pitch, and the vestibule names the packs. Exact arithmetic, every borrowed number labeled.</p>
+  <div class="note">Illustrative layout arithmetic only. Pad size, margin and pack footprint are labeled defaults; real tents, real weather and the campsite's rules govern - check the maker's floor plan.</div>
+  <div class="grid">
+    <section>
+      <h2>Sleep plan</h2>
+      <p class="hint">The floor names the honest capacity.</p>
+      <label for="p-w">Floor width (cm)</label>
+      <input id="p-w" type="number" value="260" min="0" step="5">
+      <label for="p-l">Floor length (cm)</label>
+      <input id="p-l" type="number" value="210" min="0" step="5">
+      <label for="p-r">Label rating (people)</label>
+      <input id="p-r" type="number" value="4" min="0" step="1">
+      <button id="p-go">Count the pads</button>
+      <div class="out" id="p-out"></div>
+    </section>
+    <section>
+      <h2>Site plan</h2>
+      <p class="hint">The margin names the pitch.</p>
+      <label for="t-w">Tent width (cm)</label>
+      <input id="t-w" type="number" value="260" min="0" step="5">
+      <label for="t-l">Tent length (cm)</label>
+      <input id="t-l" type="number" value="210" min="0" step="5">
+      <label for="t-sw">Clear site width (cm)</label>
+      <input id="t-sw" type="number" value="500" min="0" step="10">
+      <label for="t-sl">Clear site length (cm)</label>
+      <input id="t-sl" type="number" value="400" min="0" step="10">
+      <button id="t-go">Check the pitch</button>
+      <div class="out" id="t-out"></div>
+    </section>
+    <section>
+      <h2>Vestibule plan</h2>
+      <p class="hint">The vestibule names the packs.</p>
+      <label for="v-d">Vestibule depth (cm)</label>
+      <input id="v-d" type="number" value="75" min="0" step="5">
+      <label for="v-w">Vestibule width (cm)</label>
+      <input id="v-w" type="number" value="130" min="0" step="5">
+      <label for="v-p">Packs (count)</label>
+      <input id="v-p" type="number" value="2" min="0" step="1">
+      <button id="v-go">Stash the packs</button>
+      <div class="out" id="v-out"></div>
+    </section>
+  </div>
+</main>
+<footer>Built by the app factory. <a href="index.html">About</a> &middot; <a href="https://github.com/iLanis-agent/tentmath">Source</a></footer>
+<script src="engine.js"></script>
+<script>
+function num(id){ return parseFloat(document.getElementById(id).value); }
+function show(id, r, render){
+  var el = document.getElementById(id);
+  if (r.error) { el.textContent = r.error; el.classList.add('err'); }
+  else { el.textContent = render(r); el.classList.remove('err'); }
+}
+document.getElementById('p-go').addEventListener('click', function(){
+  var a=[num('p-w'),num('p-l'),num('p-r')];
+  show('p-out', TentMath.sleepPlan.apply(null,a), function(r){ return TentMath.renderSleep.apply(null,[r].concat(a)); });
+});
+document.getElementById('t-go').addEventListener('click', function(){
+  var a=[num('t-w'),num('t-l'),num('t-sw'),num('t-sl')];
+  show('t-out', TentMath.sitePlan.apply(null,a), function(r){ return TentMath.renderSite.apply(null,[r].concat(a)); });
+});
+document.getElementById('v-go').addEventListener('click', function(){
+  var a=[num('v-d'),num('v-w'),num('v-p')];
+  show('v-out', TentMath.vestPlan.apply(null,a), function(r){ return TentMath.renderVest.apply(null,[r].concat(a)); });
+});
+</script>
+</body>
+</html>
